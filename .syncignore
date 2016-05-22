@@ -1,0 +1,3 @@
+# Specify files or patterns to exclude from syncing
+*.log
+.bundle

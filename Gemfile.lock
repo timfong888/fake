@@ -1,0 +1,67 @@
+GEM
+  remote: https://rubygems.org/
+  specs:
+    activesupport (4.2.6)
+      i18n (~> 0.7)
+      json (~> 1.7, >= 1.7.7)
+      minitest (~> 5.1)
+      thread_safe (~> 0.3, >= 0.3.4)
+      tzinfo (~> 1.1)
+    byebug (9.0.4)
+    chronic (0.10.2)
+    coderay (1.1.1)
+    croupier (1.6.0)
+    distribution (0.7.3)
+    faker (1.6.3)
+      i18n (~> 0.5)
+    gli (2.14.0)
+    i18n (0.7.0)
+    json (1.8.3)
+    json2csv (0.0.4)
+      gli (~> 2.11, >= 2.11.0)
+      json_pure (~> 1.8.1)
+      multi_json (~> 1.10.0)
+      rake (~> 10.3, >= 10.3.2)
+      terminal-table (~> 1.4, >= 1.4.5)
+    json_converter (0.0.0)
+    json_pure (1.8.3)
+    method_source (0.8.2)
+    minitest (5.9.0)
+    multi_json (1.10.1)
+    probability (1.0.0)
+    pry (0.10.3)
+      coderay (~> 1.1.0)
+      method_source (~> 0.8.1)
+      slop (~> 3.4)
+    pry-byebug (3.4.0)
+      byebug (~> 9.0)
+      pry (~> 0.10)
+    rake (10.5.0)
+    slop (3.6.0)
+    stamp (0.6.0)
+    terminal-table (1.5.2)
+    thread_safe (0.3.5)
+    tzinfo (1.2.2)
+      thread_safe (~> 0.1)
+    useragents (0.1.4)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  activesupport
+  chronic
+  croupier (~> 1.6)
+  distribution
+  faker
+  json
+  json2csv
+  json_converter
+  probability (~> 1.0)
+  pry
+  pry-byebug
+  stamp
+  useragents (~> 0.1.4)
+
+BUNDLED WITH
+   1.11.2
