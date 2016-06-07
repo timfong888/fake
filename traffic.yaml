@@ -267,21 +267,30 @@
 
   originResponse:
     status:
-    bytes:
-    bodyBytes:
-    
+      503:          prng.rand(5..10)
+      200:          prng.rand(90..100)
+      301:          prng.rand(20..50)
+    bytes:          prng.rand(100..300)
+    bodyBytes:      prng.rand(500..3000)
+    httpLastModified:
+    httpExpires:
+    flags:
+    headers:
+
 
   origin:
     ip:
-      1: 80
+      1: prng.rand(90..100)
       2: 10
       3: 5
-    port:
+    port:                 # destination port of origin server
       80: 20
       8080: 15
       4000: 30
-    cfRailgun:  railgunstring # what is this?
-    responseTime: prng.rand(300..500)
+    cfRailgun:             # what is this?
+    railgunWanError:
+    responseTime:         prng.rand(300..500)     #origin response time in nanoseconds
+
 
 
   originResponse:
