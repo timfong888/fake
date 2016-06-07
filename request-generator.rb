@@ -24,8 +24,8 @@ class FakeRequest
 
 	# https://wiki.cfops.it/display/DATA/ELS+JSON+Log+Schema+Version+1.0
 
-	attr_accessor :convert_json, :request_json, :domains, :ip_pool, :start_time, :time_range,
-				  :client_ip_pool, :origin_ip_pool, :request_stream, :file_logs_json
+	attr_accessor :convert_json, :request_json, :domains, :ip_pool, :start_time, :end_time, :time_range,
+				  :client_ip_pool, :origin_ip_pool, :request_stream, :request_pattern, :file_logs_json
 
 
 	def initialize
@@ -37,35 +37,31 @@ class FakeRequest
 
 	end
 
-
 	
 	def generate(filename: 'attacks.yaml', **hash) # hash can be keyword/value pair passed to the appropriate method
 
 		load_yaml(filename)
 
 		@file_logs_json = File.open('logs.json', 'w')
-		puts @file_logs_json
+		puts "writing logs to here: " + @file_logs_json.to_path.to_s
 
-		puts "total number of attack profiles:"
-		puts @request_stream.count
+		puts "total number of attack profiles: " + @request_pattern.count.to_s
+
 
 		@request_stream.count.times do |index|
 
-			puts "attack_id: #{index}"
+			puts "trafficPattern index: #{index}"
 
-			attack_id = @request_stream[index].keys.first
-
-			type = @request_stream[index][attack_id]['type']
+			type = @request_stream[index]['trafficPattern']['type']
 
 			case type  # attack, traffic
 
 			when 'attack'
 
-				attack(chronic_time: 	@request_stream[index][attack_id]['chronic_time'],
-					   function: 		@request_stream[index][attack_id]['function'],
-					   attack_id: 		attack_id,
-					   duration:     	@request_stream[index][attack_id]['duration'],
-					   bucket:          @request_stream[index][attack_id]['bucket'],
+				attack(chronic_time: 	@request_stream[index]['trafficPattern']['chronic_time'],
+					   function: 		@request_stream[index]['trafficPattern']['function'],
+					   duration:     	@request_stream[index]['trafficPattern']['duration'],
+					   bucket:          @request_stream[index]['trafficPattern']['bucket'],
 					   index:           index)
 
 			end
@@ -80,80 +76,216 @@ class FakeRequest
 
 		@request_stream = YAML.load_file(filename)
 
+		@request_pattern = YAML.load_file(filename)
+
 	end
 
+	def load_json_file(filename)
+		counter = 1
+		File.open(filename, "r") do |infile|
+
+			json = {}
+
+		    while (line = infile.gets)
+		        puts "#{counter}: #{line}"
+		        counter = counter + 1
+
+		        json = line
+	binding.pry
+		    end
+		end
+	end
+
+	def auto_create_request (time_range: 1.days, index: 0, t: 1)
+
+		# what are the top level keys from the @request_pattern
+
+		keys = @request_pattern[index].keys
+
+		# go through each key
+
+		key.each do |key|
+
+			# if key = "trafficPattern" then skip
+
+			if key == "trafficPattern" # then skip
+
+			else
+
+				if @request_pattern[index][key].class == Hash
+
+					@request_json[key] = Pickup.new(@request_pattern[index][key]).pick(1)
+				end
+
+			end
+
+		end
 
 
-	def create_request (time_range: 1.days, attack_id: 1, index: 1)
+	end
+
+	def hash_or_string_to_request_json(index, key1, key2)
+
+		prng = Random.new
+
+		if @request_stream[index][key1][key2].class == Hash  
+				
+			eval_hash = Hash[ @request_stream[index][key1][key2].map{|k,str| [k, eval(str.to_s)] } ]  # take string values and apply eval to generate hash values
+
+			@request_json[key1 + '.' + key2]					= Pickup.new(eval_hash).pick(1)
+
+		elsif 	@request_stream[index][key1][key2].class == String 
+
+			@request_json[key1 + '.' + key2]					= eval (@request_stream[index][key1][key2])
+
+		end 
+
+	end
+
+	def create_request (time_range: 1.days, index: 1, t: 1)
 
 		@request_json = {}
 		@convert_json = {}
 
 		prng = Random.new
 
-		action   			= [:drop, :simulate, :unknown, :challenge].sample
+		# process all eval statements
+
 
     
+    	@request_json['zonePlan']						= Pickup.new(@request_stream[index]['zonePlan']).pick(1)
 
-    	@request_json['zonePlan']						= [ 'free', 'pro', 'business', 'enterprise', 'unk'].sample
-
-    	@request_json['zoneName']						= @domains.sample
+    	@request_json['zoneName']						= Pickup.new(@request_stream[index]['zoneName']).pick(1)
 
 
-    	@request_json['securitylevel']					= [ 'unk', 'low', 'med', 'high', 'eoff', 'help', 'off' ].sample
+    	@request_json['securitylevel']					= Pickup.new(@request_stream[index]['securityLevel']).pick(1)
 
-    # client
+    # CLIENT
 
-    	@request_json['client.ip'] 						= Pickup.new(@client_ip_pool).pick(1)
+	    keys = @request_pattern[index]['client'].keys
 
-    	@request_json['client.srcPort']					= ['80','8080'].sample
+	    keys.each do |key|
 
-    	@request_json['client.ipClass']					= Pickup.new(@request_stream[index][attack_id]['client']['ipClass']).pick(1)
-    	@request_json['client.country']					= Pickup.new(@request_stream[index][attack_id]['client']['country']).pick(1)
+	    	if key == 'ip'
 
-    	@request_json['client.sslProtocol']				= Pickup.new(@request_stream[index][attack_id]['client']['sslProtocol']).pick(1)
-    	@request_json['client.sslCipher']				= Pickup.new(@request_stream[index][attack_id]['client']['sslCipher']).pick(1)
-    	@request_json['client.deviceType']				= Pickup.new(@request_stream[index][attack_id]['client']['deviceType']).pick(1)
-    	@request_json['client.asNum']					= Pickup.new(@request_stream[index][attack_id]['client']['asNum']).pick(1)				
+	    		# IP ADDRESS
+
+				if @client_ip_pool.class == Array   
+					@request_json['client.ip'] 					= @client_ip_pool.sample
+
+				elsif @client_ip_pool.class == Hash   
+					@request_json['client.ip'] 					= Pickup.new(@client_ip_pool).pick(1)
+				end
+
+	    	else
+
+	    		@request_json['client.'+key]			= Pickup.new(@request_stream[index]['client'][key]).pick(1)
+
+	    	end
+
+	    end	
 
 
     # clientRequest
 
-    	@request_json['clientRequest.bytes']			= prng.rand(100..900)
+    	keys = @request_pattern[index]['clientRequest'].keys
 
-		@request_json['clientRequest.uri']				= Pickup.new(@request_stream[index][attack_id]['clientRequest']['uri']).pick(1)
-		@request_json['clientRequest.httpMethod']		= Pickup.new(@request_stream[index][attack_id]['clientRequest']['httpMethod']).pick(1) 
 
-		@request_json['clientRequest.httpProtocol']		= Pickup.new(@request_stream[index][attack_id]['clientRequest']['httpProtocol']).pick(1)
-		
-		@request_json['clientRequest.userAgent']		= UserAgents.rand()
+    	keys.each do |key|
 
-	# edge
+    		if key == 'userAgent'
 
-		@request_json['edge.colo']						= Pickup.new(@request_stream[index][attack_id]['edge']['colo']).pick(1)
-		@request_json['edge.pathingOp']					= Pickup.new(@request_stream[index][attack_id]['edge']['pathingOp']).pick(1)
-		@request_json['edge.pathingSrc']				= Pickup.new(@request_stream[index][attack_id]['edge']['pathingSrc']).pick(1)
-		@request_json['edge.pathingStatus']				= Pickup.new(@request_stream[index][attack_id]['edge']['pathingStatus']).pick(1)
+    			eval_hash = Hash[ @request_stream[index]['clientRequest']['userAgent'].map{|k,str| [UserAgents.rand(), eval(str.to_s)] } ]  # take string values and apply eval to generate hash values
+    			@request_json['clientRequest.'+ key]		= Pickup.new(eval_hash).pick(1) 
 
-		@request_json['edge.ratelimit.rule_id'] 		= Pickup.new(@request_stream[index][attack_id]['edge']['ratelimit']['rule_id']).pick(1).to_s unless @request_stream[index][attack_id]['edge']['ratelimit'].nil?
-		@request_json['edge.ratelimit.action'] 			= action
+    		else
+    			
+	    		hash_or_string_to_request_json(index, 'clientRequest', key)
+
+	    	end
+
+    	end
 
 	# edgeResponse
 
-		@request_json['edgeResponse.status']			= Pickup.new(@request_stream[index][attack_id]['edgeResponse']['status']).pick(1).to_s
+		keys = @request_pattern[index]['edgeResponse'].keys
 
-		
+		keys.each do |key|
+
+			hash_or_string_to_request_json(index, 'edgeResponse', key)
+
+		end
+
+
+	# edge
+
+		keys = @request_pattern[index]['edge'].keys
+
+		special_keys = ['waf', 'bbResult', 'ratelimit']
+
+		keys.each do |key|
+
+			if special_keys.include? key
+
+			else
+
+				if @request_stream[index]['edge'][key].class == Hash 
+
+					eval_hash = Hash[ @request_stream[index]['edge'][key].map{|k,str| [k, eval(str.to_s)] } ]  # take string values and apply eval to generate hash values
+
+					@request_json['edge.' + key]					= Pickup.new(eval_hash).pick(1)	
+
+				elsif @request_stream[index]['edge'][key].class == String 
+
+					@request_json['edge.'+ key]		= eval (@request_stream[index]['edge'][key])
+
+				end 
+			end		
+
+
+		end
+
+	# edgeRequest
+
+		keys = @request_pattern[index]['edgeRequest'].keys
+
+		keys.each do |key|
+
+			hash_or_string_to_request_json(index, 'edgeRequest', key)
+
+		end
+
+	
+	# cacheResponse
+		keys = @request_pattern[index]['cacheResponse'].keys
+
+		keys.each do |key|
+
+			hash_or_string_to_request_json(index, 'cacheResponse', key)
+
+		end		
+
+	# cache
+		keys = @request_pattern[index]['cache'].keys
+
+		keys.each do |key|
+
+			hash_or_string_to_request_json(index, 'cache', key)
+
+		end
+binding.pry
+
 
 	# originResponse
 
 		@request_json['originResponse.status'] 		= Pickup.new(@request_stream[index][attack_id]['originResponse']['status']).pick(1).to_s
-		@request_json['originResponse.byes']		= prng.rand(100..900)
+		@request_json['originResponse.bytes']		= eval (@request_stream[index][attack_id]['originResponse']['bytes']) unless @request_stream[index][attack_id]['originResponse'].nil?		
 
 
 	# origin
 
 		@request_json['origin.ip'] 				= Pickup.new(@origin_ip_pool).pick(1)
-		@request_json['origin.responseTime']	= prng.rand(100..900)
+		@request_json['origin.responseTime']	= eval (@request_stream[index][attack_id]['origin']['responseTime']) unless @request_stream[index][attack_id]['origin'].nil?
 
 		timestamp 								= Faker::Time.between(@start_time, @start_time + time_range).strftime('%FT%TZ') #=> "2014-09-18 12:30:59 -0700"
 		
@@ -163,11 +295,11 @@ class FakeRequest
 
 	end
 
-	def create_ip_pool(ip_pool)
+	def create_ip_pool(ip_pool_number)
 
 		# create ip_pool
 
-		ip_pool.times do | ip |
+		ip_pool_number.times do | ip |
 
 			ip_address = []
 			ip_address << Faker::Internet.public_ip_v4_address
@@ -180,11 +312,12 @@ class FakeRequest
 	end
 
 
-	def attack(chronic_time: 'beginning of today', attack_id: 1,
+	def attack(chronic_time: 'beginning of today', 
 				duration: 20, bucket: :minutes, function: 't * 100', 
-			   rule_id: 1, rule_action: :block, domain_range: 1, index: 0)
+			   domain_range: 1, index: 0)
 
-		# 
+		# random function
+		prng = Random.new
 
 		# create set of domains
 
@@ -195,50 +328,48 @@ class FakeRequest
     	end
 
     	puts "\n"
-		puts "** attack configs for #{attack_id}**"
-		puts "chronic time: #{@request_stream[index][attack_id]['chronic_time']}"
-		puts "description: #{@request_stream[index][attack_id]['description']}"
+		puts "** trafficPattern configs for #{index}**"
+		puts "chronic time: #{@request_stream[index]['trafficPattern']['chronic_time']}"
+		puts "description: #{@request_stream[index]['trafficPattern']['description']}"
 
-		@start_time = Chronic.parse(@request_stream[index][attack_id]['chronic_time'])
+		@start_time = Chronic.parse(@request_stream[index]['trafficPattern']['chronic_time'])
 		puts "start time: #{@start_time.strftime('%FT%TZ')}"
 
-		puts "duration: #{@request_stream[index][attack_id]['duration']}"
+		puts "duration: #{@request_stream[index]['trafficPattern']['duration']}"
 		puts "bucket: #{bucket}"
 
-		@end_time = (@start_time + eval(@request_stream[index][attack_id]['duration'].to_s + '.' + bucket.to_s)).strftime('%FT%TZ')
+		@end_time = (@start_time + eval(@request_stream[index]['trafficPattern']['duration'].to_s + '.' + bucket.to_s)).strftime('%FT%TZ')
 		puts "end time: #{@end_time}"
 
 		puts "interval: #{@start_time.strftime('%FT%TZ')}/#{@end_time}"
-		puts "function: #{function}"
+		puts "function: #{@request_stream[index]['trafficPattern']['function']}"
 
-		puts "rule_id: #{rule_id}"
-		puts "rule_action: #{rule_action}"
-		puts "domain_range: #{domain_range}"
 
 
 	# REFACTOR: 
-		client_ip_hash = @request_stream[index][attack_id]['client']['ip']
 
-		@client_ip_pool = {}
+		# CHECK IF NEED TO CREATE RANDOM POOLS with specialized data
 
-		client_ip_hash.keys.each do | key |
-			ip = Faker::Internet.public_ip_v4_address
-			@client_ip_pool[ip] = client_ip_hash[key]
+		if @request_stream[index]['client']['ip'].class == Fixnum #then create a pool
+
+			@client_ip_pool = {}
+			create_ip_pool(@request_stream[index]['client']['ip'])
+
+			@client_ip_pool = @ip_pool
+
+		elsif @request_stream[index]['client']['ip'].class == Hash #then create a hash substituting random ip addresses for each key
+
+			@request_stream[index]['client']['ip'].keys.each do | key |
+				create_ip_pool(10)
+				@client_ip_pool[@ip_pool.sample] = @request_stream[index]['client']['ip'][key]
+			end
+
 		end
-
-
-		origin_ip_hash = @request_stream[index][attack_id]['origin']['ip']
-
-		@origin_ip_pool = {}
-
-		origin_ip_hash.keys.each do | key |
-			ip = Faker::Internet.public_ip_v4_address
-			@origin_ip_pool[ip] = origin_ip_hash[key]
-		end
-
-		puts @origin_ip_pool
+		
+		# do the same for ['origin']['ip'] somehow
+		
 		puts " ***************** "
-		puts "\n"
+		puts "\n\n"
 
 		duration.times do |t|
 
@@ -255,7 +386,9 @@ class FakeRequest
 
 				timestamp 		  = Faker::Time.between(time_bucket_start, time_bucket_start + increment).strftime('%FT%TZ')
 
-				create_request(index: index, attack_id: attack_id)
+				# this is what generates the request
+
+				create_request(index: index, t: t)
 
 				@request_json['timestamp']				= timestamp
 				#@request_json['edge.ratelimit.rule_id'] = rule_id
