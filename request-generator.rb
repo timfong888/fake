@@ -237,7 +237,7 @@ class FakeRequest
 
 				elsif @request_stream[index]['edge'][key].class == String 
 
-					@request_json['edge.'+ key]		= eval (@request_stream[index]['edge'][key])
+					@request_json['edge.'+ key]						= eval (@request_stream[index]['edge'][key])
 
 				end 
 			end		
@@ -273,19 +273,40 @@ class FakeRequest
 			hash_or_string_to_request_json(index, 'cache', key)
 
 		end
-binding.pry
-
 
 	# originResponse
 
-		@request_json['originResponse.status'] 		= Pickup.new(@request_stream[index][attack_id]['originResponse']['status']).pick(1).to_s
-		@request_json['originResponse.bytes']		= eval (@request_stream[index][attack_id]['originResponse']['bytes']) unless @request_stream[index][attack_id]['originResponse'].nil?		
+		keys = @request_pattern[index]['originResponse'].keys
 
+		keys.each do |key|
+
+			hash_or_string_to_request_json(index, 'originResponse', key)
+
+		end
 
 	# origin
 
-		@request_json['origin.ip'] 				= Pickup.new(@origin_ip_pool).pick(1)
-		@request_json['origin.responseTime']	= eval (@request_stream[index][attack_id]['origin']['responseTime']) unless @request_stream[index][attack_id]['origin'].nil?
+		keys = @request_pattern[index]['origin'].keys
+
+		keys.each do |key|
+
+			if key == 'ip'
+
+	    		# IP ADDRESS
+
+				if @origin_ip_pool.class == Array   
+					@request_json['origin.ip'] 					= @origin_ip_pool.sample
+
+				elsif @origin_ip_pool.class == Hash   
+					@request_json['origin.ip'] 					= Pickup.new(@origin_ip_pool).pick(1)
+				end
+
+	    	else
+
+	    		hash_or_string_to_request_json(index, 'origin', key)
+
+	    	end
+	    end
 
 		timestamp 								= Faker::Time.between(@start_time, @start_time + time_range).strftime('%FT%TZ') #=> "2014-09-18 12:30:59 -0700"
 		
@@ -362,6 +383,28 @@ binding.pry
 			@request_stream[index]['client']['ip'].keys.each do | key |
 				create_ip_pool(10)
 				@client_ip_pool[@ip_pool.sample] = @request_stream[index]['client']['ip'][key]
+			end
+
+		end
+
+	# origin
+
+		@origin_ip_pool = {}
+
+		if @request_stream[index]['origin']['ip'].class == Fixnum #then create a pool
+
+			create_ip_pool(@request_stream[index]['origin']['ip'])
+
+			@origin_ip_pool = @ip_pool
+
+		elsif @request_stream[index]['origin']['ip'].class == Hash #then create a hash substituting random ip addresses for each key
+
+			@request_stream[index]['origin']['ip'].keys.each do | key |
+
+				create_ip_pool(10)
+
+				@origin_ip_pool[@ip_pool.sample] = eval @request_stream[index]['origin']['ip'][key].to_s
+
 			end
 
 		end
