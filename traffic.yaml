@@ -1,0 +1,537 @@
+---
+- trafficPattern:
+    description: wide ip distribution - attacking a single URL 
+    type: attack
+    chronic_time: beginning of last Thursday at 9:10pm
+    duration: 24
+    bucket: hours
+    function: 1 + prng.rand(2500..6700) 
+  zoneId:
+    3452343: 34
+    2342032: 24
+  zonePlan:
+    free: 10
+    pro: 15
+    business: 23
+    enterprise: 15
+    unk: 5
+  zoneName:
+    cool.com: 20
+    strange.com: 30
+    trump.com: 50 
+  securityLevel:
+    unk: 3
+    low: 5
+    med: 18
+    high: 30
+    eoff: 5
+    help: 2
+    "false": 6
+
+  client:
+    ip: 10000
+    srcPort:
+      80: 70
+      8080: 30
+
+    ipClass:  # what do each of these mean?
+      unknown: 4
+      clean: 6
+      badHost: 2
+      searchEngine: 1
+      whitelist: 10
+      greylist:  10
+      monitoringService: 8
+      securityScanner: 8
+      noRecord: 2
+      scan: 3
+      backupService: 4 
+      mobilePlatform: 1
+      tor: 5
+    country:
+      us: 25
+      uk: 10
+      ru: 10
+      pl: 15
+    sslProtocol:
+      SSLv3:   15
+      TLSv1:   15
+      TLSv1.1: 10
+      TLSv1.2: 40
+      TLSv1.3: 15
+    sslCipher:
+      UNK: 2
+      NONE: 2
+      RC4-SHA: 2
+      ECDHE-RSA-RC4-SHA: 5
+      DES-CBC3-SHA: 5
+      ECDHE-RSA-DES-CBC3-SHA: 5
+      AES256-SHA: 7
+      AES256-SHA256: 14
+      AES256-GCM-SHA384: 7
+      ECDHE-RSA-AES256-SHA: 10
+      ECDHE-RSA-AES256-SHA384: 5
+      ECDHE-RSA-AES256-GCM-SHA384: 10
+      AES128-SHA: 8
+      AES128-SHA256: 16
+      AES128-GCM-SHA256: 28
+      ECDHE-RSA-AES128-SHA: 11
+      ECDHE-RSA-AES128-SHA256: 11
+      ECDHE-RSA-AES128-GCM-SHA256: 15
+      ECDHE-RSA-CHACHA20-POLY1305: 15
+      ECDHE-ECDSA-RC4-SHA: 15
+      ECDHE-ECDSA-DES-CBC3-SHA: 5
+      ECDHE-ECDSA-AES256-SHA: 5
+      ECDHE-ECDSA-AES256-SHA384: 5
+      ECDHE-ECDSA-AES256-GCM-SHA384: 5
+      ECDHE-ECDSA-AES128-SHA: 12
+      ECDHE-ECDSA-AES128-SHA256: 12
+      ECDHE-ECDSA-AES128-GCM-SHA256: 23
+      ECDHE-ECDSA-CHACHA20-POLY1305: 16
+    deviceType:
+      unknown: 20
+      desktop: 40
+      mobile: 32 
+      tablet: 13
+    asNum:        # http://www.bgplookingglass.com/list-of-autonomous-system-numbers
+      AS15169: 10  #google
+      AS14618: 15   # AMAZON-AES - Amazon.com, Inc.
+      AS7725: 32    # COMCAST-7725 - Comcast Cable Communications Holdings, Inc
+      AS3456: 28    # TW-CABLE - Time Warner Cable
+      AS7843: 16    # TWCABLE-BACKBONE - Time Warner Cable Internet LLC
+
+
+  clientRequest:
+    bytes: prng.rand(100..900)
+    httpMethod:
+      GET:  prng.rand(80...85)
+      POST: 10
+      PUT:  5
+      DELETE: 1
+    uri: 
+      login: 85
+      password-reset: 24
+    httpProtocol:
+      HTTP/1.0: 5
+      HTTP/1.1: 15
+      HTTP/1.2: 45
+      HTTP/2.0: 10
+      SPDY/3.1: 5
+    referrer:
+      1: 30
+      2: 40
+      3: 20
+    userAgent:   # number of User Agent strings
+      1: prng.rand(80...200)
+      2: 10
+      3: 5
+      4: 5
+      5: 2
+
+  edgeResponse:
+    status:
+      429: 100
+    bytes: prng.rand(200..350)
+    bodyBytes: prng.rand(200..12000)
+    compressionRatio: prng.rand(0.5..3.2)
+    contentType:
+      css: 30
+      empty: 15
+      gif: 12
+      html: 20
+      jpeg: 15
+      json: 10
+      octet-stream: 7
+      other: 10
+      plain: 10
+      png: 21
+      x-shockwave-flash: 10
+      xml: 10
+
+  edge:
+    colo:
+      12: 5
+      38: 10
+
+    pathingOp:
+      unknown:  10
+      errHost:  30
+      ban:      20
+      tempOk:   5
+      chl:      60
+      wl:       5
+    pathingSrc:
+      unknown: 5
+      bic: 10
+      err: 2
+      forced: 5
+      hot: 7
+      macro: 12
+      skip: 6
+      sslv: 1
+      user: 1
+      undef: 1
+    pathingStatus:
+      unknown: 5
+      aoCrawl: 5
+      badHost: 5
+      badOk: 3
+      bak: 3
+      captchaErr: 6 
+      captchaFail: 12
+      captchaNew: 21
+      captchaOk: 5
+      captchaSucc: 8
+      cdnjs: 25
+      ctry: 2
+      cyclic: 3 
+      dnsErr: 6
+      fint: 12
+      grey: 25
+      ip: 5
+      ipr16: 2 
+      ipr24: 2
+      jschlErr: 5
+      jschlFail: 3
+      jschlNew: 15
+      jschlOk: 2
+      jschlSucc: 13
+      mob: 3
+      mon: 2
+      new: 5
+      nr: 5
+      reservedIp: 11
+      reservedIp6: 11
+      scan: 2
+      se: 3
+      wl: 6
+      sniMismatch: 5
+    cacheResponseTime: prng.rand(300..5000)
+    bbResult:   # https://stash.cfops.it/projects/NGINX/repos/lua-cdn/browse/browser_check.lua#44
+      17: 15
+      5:  12
+
+    ratelimit:
+      rule_id:
+          5: 100
+      action:
+          block: 100
+
+    waf:
+      ruleId: 1
+      ruleMessage: This was a WAF ruleMessage
+      action: block
+
+  edgeRequest:
+    bytes: prng.rand(150..200)
+    bodyBytes:        # not currently used
+    httpHost:         # HTTP host header sent from the edge to the origin server
+    httpMethod:       # HTTP method sent from the edge to the origin server
+      POST: 80
+      PATCH: 20
+    uri:              # HTTP URI sent from the edge to the origin server
+    keepaliveStatus:  #  FOR INTERNAL USE ONLY
+
+
+  cacheResponse: 
+    status:
+      429: prng.rand(80..100)
+      522: prng.rand(20..30)
+    bytes: prng.rand(100..3000)           # amount of bytes sent to a client
+
+
+  cache:
+    startTimestamp:
+    endTimestamp:
+    cacheServerName:
+    cacheFileKey:
+    bckType:
+    cacheStatus:      # status of object in cache
+      miss:           prng.rand(15..20)    
+      expired:        prng.rand(5..20)
+      updating:       prng.rand(5..50)
+      state:          prng.rand(5..10)
+      hit:            prng.rand(90..100)
+      ignored:        prng.rand(5..10)
+      bypass:         prng.rand(5..10)
+      revalidated:    prng.rand(20..50)
+    cacheInternalIp:    #FOR INTERNAL USE ONLY
+    cacheExternalIp:    #IP used for connection between cache and origin server
+    cacheExternalPort:  #source port used for connection between cache and origin
+      80:             prng.rand(15..20) 
+      4000:           prng.rand(5..50) 
+
+  cacheRequest:
+    keepaliveStatus:    # status of origin connection keepalive
+
+
+  originResponse:
+    status:
+    bytes:
+    bodyBytes:
+    
+
+  origin:
+    ip:
+      1: 80
+      2: 10
+      3: 5
+    port:
+      80: 20
+      8080: 15
+      4000: 30
+    cfRailgun:  railgunstring # what is this?
+    responseTime: prng.rand(300..500)
+
+
+  originResponse:
+    status:
+      200: 80
+      401: 10
+      503: 20
+    bytes: prng.rand(2000..5000)
+    
+
+
+- trafficPattern:
+    description: wide ip distribution 
+    type: attack
+    chronic_time: beginning of last Thursday at 9:10pm
+    duration: 24
+    bucket: hours
+    function: 1 + prng.rand(2500..6700) 
+  zoneId:
+    3452343: 34
+    2342032: 24
+  zonePlan:
+    free: 10
+    pro: 15
+    business: 23
+    enterprise: 15
+    unk: 5
+  zoneName:
+    cool.com: 20
+    strange.com: 30
+    trump.com: 50  
+  client:
+    ip: 
+      1: 20
+      2: 50
+      3: 10
+      4: 5 
+      5: 11 
+      6: 17 
+      7: 25 
+      8: 3 
+      9: 4 
+      10: 56 
+      11: 7 
+      12: 13 
+      13: 5
+      14: 5
+      15: 5
+      16: 5
+      17: 5
+      18: 5
+      19: 5
+      20: 5
+      21: 5
+      22: 5
+
+    ipClass:  # what do each of these mean?
+      unknown: 4
+      clean: 6
+      badHost: 2
+      searchEngine: 1
+      whitelist: 10
+      greylist:  10
+      monitoringService: 8
+      securityScanner: 8
+      noRecord: 2
+      scan: 3
+      backupService: 4 
+      mobilePlatform: 1
+      tor: 5
+    country:
+      us: 25
+      uk: 10
+      ru: 10
+      pl: 15
+    sslProtocol:
+      SSLv3:   15
+      TLSv1:   15
+      TLSv1.1: 10
+      TLSv1.2: 40
+      TLSv1.3: 15
+    sslCipher:
+      UNK: 2
+      NONE: 2
+      RC4-SHA: 2
+      ECDHE-RSA-RC4-SHA: 5
+      DES-CBC3-SHA: 5
+      ECDHE-RSA-DES-CBC3-SHA: 5
+      AES256-SHA: 7
+      AES256-SHA256: 14
+      AES256-GCM-SHA384: 7
+      ECDHE-RSA-AES256-SHA: 10
+      ECDHE-RSA-AES256-SHA384: 5
+      ECDHE-RSA-AES256-GCM-SHA384: 10
+      AES128-SHA: 8
+      AES128-SHA256: 16
+      AES128-GCM-SHA256: 28
+      ECDHE-RSA-AES128-SHA: 11
+      ECDHE-RSA-AES128-SHA256: 11
+      ECDHE-RSA-AES128-GCM-SHA256: 15
+      ECDHE-RSA-CHACHA20-POLY1305: 15
+      ECDHE-ECDSA-RC4-SHA: 15
+      ECDHE-ECDSA-DES-CBC3-SHA: 5
+      ECDHE-ECDSA-AES256-SHA: 5
+      ECDHE-ECDSA-AES256-SHA384: 5
+      ECDHE-ECDSA-AES256-GCM-SHA384: 5
+      ECDHE-ECDSA-AES128-SHA: 12
+      ECDHE-ECDSA-AES128-SHA256: 12
+      ECDHE-ECDSA-AES128-GCM-SHA256: 23
+      ECDHE-ECDSA-CHACHA20-POLY1305: 16
+    deviceType:
+      unknown: 20
+      desktop: 40
+      mobile: 32 
+      tablet: 13
+    asNum:        # http://www.bgplookingglass.com/list-of-autonomous-system-numbers
+      AS15169: 10  #google
+      AS14618: 15   # AMAZON-AES - Amazon.com, Inc.
+      AS7725: 32    # COMCAST-7725 - Comcast Cable Communications Holdings, Inc
+      AS3456: 28    # TW-CABLE - Time Warner Cable
+      AS7843: 16    # TWCABLE-BACKBONE - Time Warner Cable Internet LLC
+
+
+  clientRequest:
+    httpMethod:
+      GET:  80
+      POST: 10
+      PUT:  5
+      DELETE: 1
+    uri: 
+      login: 85
+      password-reset: 24
+    httpProtocol:
+      HTTP/1.0: 5
+      HTTP/1.1: 15
+      HTTP/1.2: 45
+      HTTP/2.0: 10
+      SPDY/3.1: 5
+    userAgent: 5    # number of User Agent strings
+
+  edge:
+    colo:
+      12: 5
+      38: 10
+
+    pathingOp:
+      unknown:  10
+      errHost:  30
+      ban:      20
+      tempOk:   5
+      chl:      60
+      wl:       5
+    pathingSrc:
+      unknown: 5
+      bic: 10
+      err: 2
+      forced: 5
+      hot: 7
+      macro: 12
+      skip: 6
+      sslv: 1
+      user: 1
+      undef: 1
+    pathingStatus:
+      unknown: 5
+      aoCrawl: 5
+      badHost: 5
+      badOk: 3
+      bak: 3
+      captchaErr: 6 
+      captchaFail: 12
+      captchaNew: 21
+      captchaOk: 5
+      captchaSucc: 8
+      cdnjs: 25
+      ctry: 2
+      cyclic: 3 
+      dnsErr: 6
+      fint: 12
+      grey: 25
+      ip: 5
+      ipr16: 2 
+      ipr24: 2
+      jschlErr: 5
+      jschlFail: 3
+      jschlNew: 15
+      jschlOk: 2
+      jschlSucc: 13
+      mob: 3
+      mon: 2
+      new: 5
+      nr: 5
+      reservedIp: 11
+      reservedIp6: 11
+      scan: 2
+      se: 3
+      wl: 6
+      sniMismatch: 5
+    bbResult:   # https://stash.cfops.it/projects/NGINX/repos/lua-cdn/browse/browser_check.lua#44
+      17: 15
+      5:  12
+
+    ratelimit:
+      rule_id:
+          5: 100
+      action:
+          block: 100
+
+    waf:
+      ruleId: 1
+      ruleMessage: This was a WAF ruleMessage
+      action: block
+
+  edgeResponse:
+    status:
+      429: 100
+    bytes: 20
+    bodyBytes: 100
+    compressionRatio: prng.rand(0.5..3.2)
+    contentType:
+      css: 30
+      empty: 15
+      gif: 12
+      html: 20
+      jpeg: 15
+      json: 10
+      octet-stream: 7
+      other: 10
+      plain: 10
+      png: 21
+      x-shockwave-flash: 10
+      xml: 10
+
+  origin:
+    ip:
+      1: 80
+      2: 10
+      3: 5
+    port:
+      80: 20
+      8080: 15
+      4000: 30
+    cfRailgun:  railgunstring # what is this?
+    responseTime: prng.rand(300..500)
+
+
+  originResponse:
+    status:
+      200: 80
+      401: 10
+      503: 20
+    bytes: prng.rand(2000..5000)
+    
