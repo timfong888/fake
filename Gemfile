@@ -21,6 +21,7 @@ gem 'json'
 gem 'stamp'
 gem 'json2csv'
 gem 'json_converter'
+gem 'sparsify' #https://github.com/simplymeasured/sparsify
 
 gem 'activesupport'
 

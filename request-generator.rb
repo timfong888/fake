@@ -25,7 +25,7 @@ class FakeRequest
 	# https://wiki.cfops.it/display/DATA/ELS+JSON+Log+Schema+Version+1.0
 
 	attr_accessor :convert_json, :request_json, :domains, :ip_pool, :start_time, :end_time, :time_range,
-				  :client_ip_pool, :origin_ip_pool, :request_stream, :request_pattern, :file_logs_json
+				  :client_ip_pool, :origin_ip_pool, :request_stream, :request_pattern, :file_logs_json, :interval
 
 
 	def initialize
@@ -67,7 +67,37 @@ class FakeRequest
 			end
 
 		end
+
 		@file_logs_json.close
+
+		## create template files
+
+		druid_ip = '107.170.97.6'
+
+		puts @interval
+
+		puts "modify ratelimit-index-template"
+
+		`ruby -pi.bak -e "gsub(/interval-sub/, '#{@interval}')" ratelimit-index-template.json`
+
+		puts "copy the modified template to ratelimit-index:"
+
+		`cp ratelimit-index-template.json ratelimit-index.json`
+
+		puts "copy the original found in ratelimit-index-template.json.bak back to ratelimit-index-template.json:"
+		`cp ratelimit-index-template.json.bak ratelimit-index-template.json`
+
+		puts 'copy the new ingest file ratelimit-index.json to docker druid:'
+		`scp ratelimit-index.json root@#{druid_ip}:~`
+
+		puts "copy the generated logs logs.json to docker druid on #{druid_ip}:"
+		`scp logs.json root@#{druid_ip}:~`
+
+		puts "ready to import from docker root into druid and ingest by using script:"
+		puts "./druid_on_docker_import.sh logs.json ratelimit-index.json"
+
+		#`ruby -pi.bak -e "gsub(/#{@interval}/, 'interval-sub')" ratelimit-index-template.json`
+
 
 	end
 
@@ -332,6 +362,15 @@ class FakeRequest
 
 	end
 
+	def copy_to_druid
+
+		# druid IP address: 107.170.97.6
+
+		druid_ip = '107.170.97.6'
+
+		`scp logs.json root@#{druid_ip}:~`
+		
+	end
 
 	def attack(chronic_time: 'beginning of today', 
 				duration: 20, bucket: :minutes, function: 't * 100', 
@@ -362,7 +401,8 @@ class FakeRequest
 		@end_time = (@start_time + eval(@request_stream[index]['trafficPattern']['duration'].to_s + '.' + bucket.to_s)).strftime('%FT%TZ')
 		puts "end time: #{@end_time}"
 
-		puts "interval: #{@start_time.strftime('%FT%TZ')}/#{@end_time}"
+		puts @interval = "#{@start_time.strftime('%FT%TZ')}/#{@end_time}"
+		puts "interval: " + @interval
 		puts "function: #{@request_stream[index]['trafficPattern']['function']}"
 
 
@@ -371,9 +411,11 @@ class FakeRequest
 
 		# CHECK IF NEED TO CREATE RANDOM POOLS with specialized data
 
+		@client_ip_pool = {}
+
 		if @request_stream[index]['client']['ip'].class == Fixnum #then create a pool
 
-			@client_ip_pool = {}
+			
 			create_ip_pool(@request_stream[index]['client']['ip'])
 
 			@client_ip_pool = @ip_pool
@@ -382,6 +424,7 @@ class FakeRequest
 
 			@request_stream[index]['client']['ip'].keys.each do | key |
 				create_ip_pool(10)
+			
 				@client_ip_pool[@ip_pool.sample] = @request_stream[index]['client']['ip'][key]
 			end
 
