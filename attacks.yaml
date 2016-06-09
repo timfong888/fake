@@ -198,7 +198,7 @@
     chronic_time: beginning of last wednesday at 8:50pm
     duration: 50
     bucket: minutes
-    function: prng = Random.new; 1+(t+50)*5    # every 10 seconds send 2 requests for each IP
+    function: prng = Random.new; (t+50) * 5 + 1   # every 10 seconds send 2 requests for each IP
     domain_range: 1
 
     client:
