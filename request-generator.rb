@@ -70,6 +70,8 @@ class FakeRequest
 
 		@file_logs_json.close
 
+		create_templates
+
 		## create template files
 	end
 
