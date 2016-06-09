@@ -25,7 +25,7 @@ class FakeRequest
 	# https://wiki.cfops.it/display/DATA/ELS+JSON+Log+Schema+Version+1.0
 
 	attr_accessor :convert_json, :request_json, :domains, :ip_pool, :start_time, :end_time, :time_range,
-				  :client_ip_pool, :origin_ip_pool, :request_stream, :request_pattern, :file_logs_json, :interval
+				  :client_ip_pool, :origin_ip_pool, :request_stream, :request_pattern, :file_logs_json, :interval, :druid_ip
 
 
 	def initialize
@@ -79,7 +79,7 @@ class FakeRequest
 
 	def create_templates
 
-		druid_ip = '107.170.97.6'
+		@druid_ip = '107.170.97.6'
 
 		puts @interval
 
@@ -95,16 +95,18 @@ class FakeRequest
 		`cp ratelimit-index-template.json.bak ratelimit-index-template.json`
 
 		puts 'copy the new ingest file ratelimit-index.json to docker druid:'
-		`scp ratelimit-index.json root@#{druid_ip}:~`
+		`scp ratelimit-index.json root@#{@druid_ip}:~`
 
-		puts "copy the generated logs logs.json to docker druid on #{druid_ip}:"
-		`scp logs.json root@#{druid_ip}:~`
+		puts "copy the generated logs logs.json to docker druid on #{@druid_ip}:"
+		`scp logs.json root@#{@druid_ip}:~`
 
 		puts "ready to import from docker root into druid and ingest by using script:"
-		puts "ssh root@#{druid_ip} ./druid_on_docker_import.sh logs.json ratelimit-index.json"
+		puts "ssh root@#{@druid_ip} ./druid_on_docker_import.sh logs.json ratelimit-index.json"
 
-		`ssh root@#{druid_ip} "./druid_on_docker_import.sh logs.json ratelimit-index.json"`
+		`ssh root@#{@druid_ip} "./druid_on_docker_import.sh logs.json ratelimit-index.json"`
 
+		puts `log into druid docker: #{@druid_ip}`
+		`ssh root@107.170.97.6`
 
 		#`ruby -pi.bak -e "gsub(/#{@interval}/, 'interval-sub')" ratelimit-index-template.json`
 

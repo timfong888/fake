@@ -1,0 +1,52 @@
+{
+  "type" : "index_hadoop",
+  "spec" : {
+    "ioConfig" : {
+      "type" : "hadoop",
+      "inputSpec" : {
+        "type" : "static",
+        "paths" : "quickstart/ratelimit-logs.json"
+      }
+    },
+    "dataSchema" : {
+      "dataSource" : "ratelimit-logs",
+      "granularitySpec" : {
+        "type" : "uniform",
+        "segmentGranularity" : "day",
+        "queryGranularity" : "none",
+        "intervals" : ["interval-sub"]
+      },
+      "parser" : {
+        "type" : "string",
+        "parseSpec" : {
+          "format" : "json",
+          "dimensionsSpec" : {
+          },
+          "timestampSpec" : {
+            "format" : "auto",
+            "column" : "timestamp"
+          }
+        }
+      },
+      "metricsSpec" : [
+        {
+          "name" : "count",
+          "type" : "count"
+        },
+        {
+          "type" : "doubleSum",
+          "name" : "origin.responseTime",
+          "fieldName" : "origin.responseTime"
+        }
+      ]
+    },
+    "tuningConfig" : {
+      "type" : "hadoop",
+      "partitionsSpec" : {
+        "type" : "hashed",
+        "targetPartitionSize" : 5000000
+      },
+      "jobProperties" : {}
+    }
+  }
+}
