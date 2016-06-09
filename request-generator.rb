@@ -504,7 +504,7 @@ class FakeRequest
 
 end
 
-FakeRequest.new.generate(filename: ARGV[0])
+
 
 
 
