@@ -71,12 +71,17 @@ class FakeRequest
 		@file_logs_json.close
 
 		## create template files
+	end
+
+
+
+	def create_templates
 
 		druid_ip = '107.170.97.6'
 
 		puts @interval
 
-		puts "modify ratelimit-index-template"
+		puts "modify ratelimit-index-template with #{@interval}"
 
 		`ruby -pi.bak -e "gsub(/interval-sub/, '#{@interval}')" ratelimit-index-template.json`
 
@@ -94,7 +99,10 @@ class FakeRequest
 		`scp logs.json root@#{druid_ip}:~`
 
 		puts "ready to import from docker root into druid and ingest by using script:"
-		puts "./druid_on_docker_import.sh logs.json ratelimit-index.json"
+		puts "ssh root@#{druid_ip} ./druid_on_docker_import.sh logs.json ratelimit-index.json"
+
+		`ssh root@#{druid_ip} "./druid_on_docker_import.sh logs.json ratelimit-index.json"`
+
 
 		#`ruby -pi.bak -e "gsub(/#{@interval}/, 'interval-sub')" ratelimit-index-template.json`
 
