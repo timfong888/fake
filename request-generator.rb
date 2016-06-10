@@ -83,11 +83,15 @@ class FakeRequest
 
 		puts @interval
 
-		puts "modify ratelimit-index-template with #{@interval}"
+		line = "modify ratelimit-index-template with #{@interval}"
+		puts line
+		line << line + "\n"
 
 		`ruby -pi.bak -e "gsub(/interval-sub/, '#{@interval}')" ratelimit-index-template.json`
 
-		puts "copy the modified template to ratelimit-index:"
+		line = "copy the modified template to ratelimit-index:"
+		puts line
+
 
 		`cp ratelimit-index-template.json ratelimit-index.json`
 
