@@ -27,3 +27,5 @@ gem 'activesupport'
 
 gem 'pry'
 gem 'pry-byebug'
+gem 'pry-rescue'
+gem 'pry-stack_explorer'
