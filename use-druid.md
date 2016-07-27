@@ -53,12 +53,15 @@ echo "open pivot"
 open "http://$ip:9095/pivot#"
 
 ## Generate new ratelimit-logs.json
-
+* General new log file with one added field to the scheme (edgeResponse.status)
 * import using same script
 * confirm timestamps in the interval
-* checked the Druid console: https://www.dropbox.com/s/bexpa5vjvbm6knw/Screenshot%202016-05-21%2018.17.19.png?dl=0
+* checked the Druid console: https://www.dropbox.com/s/d13yrohsszeqzqy/Screenshot%202016-05-21%2020.51.32.png?dl=0
 
 
 
-expect to see data in that time range in pivot but it's not there:
+expect to see dimensions in that time range in pivot but it's not there:
+https://www.dropbox.com/s/05989zug60bhszi/Screenshot%202016-05-21%2020.53.14.png?dl=0
+
+
 
